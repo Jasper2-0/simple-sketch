@@ -25,7 +25,7 @@ impl Application for Sketch {
     }
 
     fn update(&mut self) {
-        self.angle += 0.05;
+        self.angle += 0.0025;
         if self.angle > 2.0 * PI {
             self.angle -= 2.0 * PI;
         }
@@ -36,12 +36,12 @@ impl Application for Sketch {
         canvas.set_stroke(Some(Color::new(255, 255, 255, 255)));
         canvas.set_stroke_weight(2.0);
 
-        let center_x = 640.0 as f32 / 2.0;
-        let center_y = 360.0 as f32 / 2.0;
+        let center_x = 640.0 / 2.0;
+        let center_y = 360.0 / 2.0;
         let radius = 90.0;
 
-        let x = center_x + radius * self.angle.cos()*0.25;
-        let y = center_y + radius * self.angle.sin()*0.25;
+        let x = center_x + radius * self.angle.cos();
+        let y = center_y + radius * self.angle.sin();
 
         canvas.ellipse(x, y, 50.0, 50.0);
     }
