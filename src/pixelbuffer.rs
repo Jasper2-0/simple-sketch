@@ -52,7 +52,7 @@ impl PixelBuffer {
             self.buffer[index] = Color::new(new_r, new_g, new_b, new_a).0;
         }
     }
-
+    // Wu's anti-aliased line drawing algorithm
     pub fn draw_line_aa(&mut self, mut start: Point, mut end: Point, color: Color) {
         let steep = (end.y - start.y).abs() > (end.x - start.x).abs();
         
