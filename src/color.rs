@@ -6,7 +6,6 @@ pub struct Color(pub u32);
 pub enum ColorFormat {
     Rgba,
     RGBHex,
-    Raw,
 }
 
 impl Color {
@@ -31,21 +30,13 @@ impl Color {
             ColorFormat::RGBHex => {
                 write!(f, "Color(#{:02X}{:02X}{:02X})", self.r(), self.g(), self.b())
             }
-            ColorFormat::Raw => {
-                write!(f, "Color({})", self.0)
-            }
         }
     }
-
 }
-
-
 
 impl fmt::Debug for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Default to RGBA format if no special formatting is specified
         if f.alternate() {
-            // Use '#' flag for RGBHex format
             self.fmt_debug(f, ColorFormat::RGBHex)
         } else {
             self.fmt_debug(f, ColorFormat::Rgba)
