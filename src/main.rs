@@ -1,14 +1,14 @@
-mod application;
 mod sketch;
 mod canvas;
 mod color;
 mod shape;
+mod point;
+mod pixelbuffer;
 
 use sketch::Sketch;
-use application::ApplicationRunner;
 
 fn main() -> Result<(), String> {
-    let mut runner = ApplicationRunner::<Sketch>::new()?;
-    runner.run();
+    let mut sketch = Sketch::new()?;
+    sketch.run();
     Ok(())
 }
