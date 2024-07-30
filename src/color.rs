@@ -22,6 +22,28 @@ impl Color {
         Color::new(self.r(), self.g(), self.b(), alpha)
     }
 
+    // Helper function to convert HSV to RGB
+    pub fn hsv_to_rgb(h: f32, s: f32, v: f32) -> Color {
+        let c = v * s;
+        let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
+        let m = v - c;
+    
+        let (r, g, b) = match (h % 360.0) as u32 {
+            0..=59 => (c, x, 0.0),
+            60..=119 => (x, c, 0.0),
+            120..=179 => (0.0, c, x),
+            180..=239 => (0.0, x, c),
+            240..=299 => (x, 0.0, c),
+            _ => (c, 0.0, x),
+        };
+    
+        Color::new(
+            ((r + m) * 255.0) as u8,
+            ((g + m) * 255.0) as u8,
+            ((b + m) * 255.0) as u8,
+            255,
+        )
+    }
     // New method to return the color as a u32
     pub fn to_u32(&self) -> u32 {
         self.0
