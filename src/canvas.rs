@@ -1,6 +1,6 @@
 use crate::pixelbuffer::PixelBuffer;
 use crate::color::Color;
-use crate::point::Point;
+use crate::geom::Point;
 use crate::shape::{Shape, Ellipse, Rectangle};
 
 pub struct Canvas {

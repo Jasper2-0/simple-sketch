@@ -1,7 +1,7 @@
 use minifb::{Window, WindowOptions};
 use crate::canvas::Canvas;
 use crate::color::Color;
-use crate::point::Point;
+use crate::geom::Point;
 use std::f32::consts::PI;
 
 //use std::time::Instant;

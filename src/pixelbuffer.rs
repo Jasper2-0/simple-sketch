@@ -1,5 +1,5 @@
 use crate::color::Color;
-use crate::point::Point;
+use crate::geom::Point;
 
 pub struct PixelBuffer {
     pub width: usize,

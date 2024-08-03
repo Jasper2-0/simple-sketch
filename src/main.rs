@@ -2,7 +2,7 @@ mod sketch;
 mod canvas;
 mod color;
 mod shape;
-mod point;
+mod geom;
 mod pixelbuffer;
 
 use sketch::Sketch;

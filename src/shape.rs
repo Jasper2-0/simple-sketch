@@ -1,4 +1,4 @@
-use crate::point::Point;
+use crate::geom::Point;
 
 /// Represents a geometric shape in 2D space.
 pub trait Shape {
