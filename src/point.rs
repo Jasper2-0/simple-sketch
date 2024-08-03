@@ -27,6 +27,13 @@ impl Point {
         }
     }
 
+    pub fn abs(&self) -> Point {
+        Point {
+            x: self.x.abs(),
+            y: self.y.abs(),
+        }
+    }
+
     pub fn perpendicular(&self) -> Point {
         Point {
             x: -self.y,

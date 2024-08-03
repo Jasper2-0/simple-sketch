@@ -47,7 +47,8 @@ impl Canvas {
     }
     pub fn line(&mut self, start: Point, end: Point) {
         if let Some(stroke_color) = &self.stroke_color {
-            self.pixel_buffer.draw_line_aa(start, end, stroke_color.clone());
+            //self.pixel_buffer.draw_line(start, end, *stroke_color);
+            self.pixel_buffer.draw_line_aa(start, end, *stroke_color);
         }
     }
 
@@ -75,11 +76,11 @@ impl Canvas {
 
     fn draw_shape_aa(&mut self, shape: &impl Shape) {
         if let Some(fill_color) = &self.fill_color {
-            self.fill_shape_aa(shape, fill_color.clone());
+            self.fill_shape_aa(shape, *fill_color);
 
         }
         if let Some(stroke_color) = &self.stroke_color {
-            self.stroke_shape(shape, stroke_color.clone());
+            self.stroke_shape(shape, *stroke_color);
 //            self.stroke_shape_aa(shape, stroke_color.clone());
         }
     }
@@ -144,7 +145,7 @@ impl Canvas {
         // Calculate the coverage as the ratio of points inside the shape to total sample points    
         count as f32 / samples.len() as f32
     }
-
+    #[allow(dead_code)]
     fn calculate_stroke_coverage(&self, distance: f32) -> f32 {
         let half_stroke = self.stroke_weight / 2.0;
         if distance.abs() > half_stroke {

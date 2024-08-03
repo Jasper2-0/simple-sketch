@@ -44,10 +44,6 @@ impl Color {
             255,
         )
     }
-    // New method to return the color as a u32
-    pub fn to_u32(&self) -> u32 {
-        self.0
-    }
 
     pub fn fmt_debug(&self, f: &mut fmt::Formatter<'_>, format: ColorFormat) -> fmt::Result {
         match format {

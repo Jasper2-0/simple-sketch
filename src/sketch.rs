@@ -4,7 +4,7 @@ use crate::color::Color;
 use crate::point::Point;
 use std::f32::consts::PI;
 
-use std::time::{Duration, Instant};
+//use std::time::Instant;
 
 pub struct Sketch {
     window: Window,
@@ -36,9 +36,9 @@ impl Sketch {
     pub fn run(&mut self) {
         while self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) {
             self.update();
-            let start = Instant::now();
+            //let start = Instant::now();
             self.draw();
-            let duration = start.elapsed();
+            //let duration = start.elapsed();
             //println!("Time elapsed in draw() is: {:?}", duration);
 
             self.window
@@ -75,34 +75,38 @@ impl Sketch {
             self.canvas.line(start, end);
         }
 
-    // Drawing 10 rotating and waving circles
-    let center = Point::new(self.canvas.width as f32 / 2.0, self.canvas.height as f32 / 2.0);
-    let base_radius = 100.0; // Base radius for the circular motion
-    let wave_amplitude = 0.0; // Amplitude of the wave motion
-    let wave_frequency = 6.0; // Frequency of the wave motion
+        // Drawing 10 rotating and waving circles
+        let center = Point::new(self.canvas.width as f32 / 2.0, self.canvas.height as f32 / 2.0);
+        let base_radius = 100.0; // Base radius for the circular motion
+        let wave_amplitude = 10.0; // Amplitude of the wave motion
+        let wave_frequency = 6.0; // Frequency of the wave motion
 
-    for i in 0..10 {
-        let angle = self.angle + (i as f32 * PI * 2.0 / 10.0);
-        
-        // Add a sine wave to the radius, with a phase offset for each circle
-        let wave_offset = self.angle * wave_frequency + (i as f32 * PI / 5.0);
-        let radius = base_radius + wave_amplitude * wave_offset.sin();
-        
-        let circle_center = center + Point::new(radius * angle.cos(), radius * angle.sin());
+        let num_ellipses = 100;
 
-        // Set different colors for each circle
-        let hue = (i as f32 / 10.0) * 360.0;
-        let color = Color::hsv_to_rgb(hue, 1.0, 1.0);
-        self.canvas.set_stroke(Some(color));
-        self.canvas.set_fill(Some(color));
+        for i in 0..num_ellipses {
+            let angle = self.angle + (i as f32 * PI * 2.0 / num_ellipses as f32);
 
-        // Draw the circle
-        self.canvas.set_stroke_weight(1.0);
-        self.canvas.ellipse(circle_center, 50.0, 50.0);
+            // Add a sine wave to the radius, with a phase offset for each circle
+            let wave_offset = self.angle * wave_frequency + (i as f32 * PI / 5.0);
+            let radius = base_radius + wave_amplitude * wave_offset.sin();
 
-        // Draw line from center to circle
-        //self.canvas.line(center, circle_center);
-    }
+            let circle_center = center + Point::new(radius * angle.cos(), radius * angle.sin());
+
+            // Set different colors for each circle
+            let hue = (i as f32 / num_ellipses as f32) * 360.0;
+            let color = Color::hsv_to_rgb(hue, 1.0, 1.0);
+            self.canvas.set_stroke(Some(color));
+            self.canvas.set_fill(Some(color));
+
+            // Draw the circle
+            self.canvas.set_stroke_weight(1.0);
+            self.canvas.ellipse(circle_center, 5.0, 5.0);
+
+            // Draw line from center to circle
+            self.canvas.line(center, circle_center);
+        }
+
+        self.canvas.rectangle(Point::new(20.0,20.0), 40.0, 30.0);
     }
 
 }
