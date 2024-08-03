@@ -26,10 +26,6 @@ impl PixelBuffer {
         }
     }
 
-
-    /**
-    * Pixel setting methods
-    */
     pub fn set_pixel(&mut self, x: i32, y: i32, color: Color) {
         // Check if the pixel is within the canvas bounds
         if x >= 0 && x < self.width as i32 && y >= 0 && y < self.height as i32 {
@@ -57,14 +53,28 @@ impl PixelBuffer {
         }
     }
 
-    pub fn plot(&mut self, x: i32, y: i32, color: Color, alpha: f32) {
-        let aa_color = color.with_alpha((color.a() as f32 * alpha) as u8);
-        self.blend_pixel(x, y, &aa_color);
+    pub fn line_dda(&mut self, start: Point, end: Point, color: Color) {
+        let dx = end.x as i32 - start.x as i32;
+        let dy = end.y as i32 - start.y as i32;
+        
+        let steps = std::cmp::max(dx.abs(), dy.abs());
+        
+        let x_increment = dx as f32 / steps as f32;
+        let y_increment = dy as f32 / steps as f32;
+        
+        let mut x = start.x;
+        let mut y = start.y;
+        
+        for _ in 0..=steps {
+            self.set_pixel(x.round() as i32, y.round() as i32, color);
+            x += x_increment;
+            y += y_increment;
+        }
     }
 
     #[allow(dead_code)]
     // bresenham's line drawing algorithm
-    pub fn draw_line(&mut self, start: Point, end: Point, color: Color) {
+    pub fn line_bresenham(&mut self, start: Point, end: Point, color: Color) {
         
         let start_x = start.x.floor() as i32;
         let start_y = start.y.floor() as i32;
@@ -98,7 +108,7 @@ impl PixelBuffer {
     
 
     // Wu's anti-aliased line drawing algorithm
-    pub fn draw_line_aa(&mut self, mut start: Point, mut end: Point, color: Color) {
+    pub fn line_wu(&mut self, mut start: Point, mut end: Point, color: Color) {
         let steep = (end.y - start.y).abs() > (end.x - start.x).abs();
         
         if steep {
@@ -160,6 +170,10 @@ impl PixelBuffer {
                 intery += gradient;
             }
         }
+    }
+    fn plot(&mut self, x: i32, y: i32, color: Color, alpha: f32) {
+        let aa_color = color.with_alpha((color.a() as f32 * alpha) as u8);
+        self.blend_pixel(x, y, &aa_color);
     }
 /* 
         // Fill a rectangular area with a specific color
