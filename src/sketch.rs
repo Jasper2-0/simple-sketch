@@ -2,6 +2,7 @@ use minifb::{Window, WindowOptions};
 use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::geom::Point;
+use crate::shape::{PolygonBuilder};
 use std::f32::consts::PI;
 
 //use std::time::Instant;
@@ -31,6 +32,9 @@ impl Sketch {
             canvas: Canvas::new(width, height),
             angle: 0.0,
         })
+
+
+
     }
 
     pub fn run(&mut self) {
@@ -107,6 +111,21 @@ impl Sketch {
         }
 
         self.canvas.rectangle(Point::new(20.0,20.0), 40.0, 30.0);
+
+        // Draw a polygon
+        let mut polygon_builder = PolygonBuilder::new();
+        polygon_builder.begin_shape();
+        polygon_builder.vertex(100.0, 100.0);
+        polygon_builder.vertex(200.0, 50.0);
+        polygon_builder.vertex(300.0, 100.0);
+        polygon_builder.vertex(250.0, 200.0);
+        polygon_builder.vertex(150.0, 200.0);
+        let polygon = polygon_builder.end_shape().unwrap();
+
+        self.canvas.set_fill(Some(Color::new(255, 0, 0, 128))); // Semi-transparent red
+        self.canvas.draw_polygon(&polygon);
+
+
     }
 
 }

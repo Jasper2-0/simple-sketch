@@ -1,5 +1,7 @@
-use crate::geom::Point;
+use std::fmt;
 
+use crate::geom::Point;
+use crate::geom::Line;
 /// Represents a geometric shape in 2D space.
 pub trait Shape {
     /// Determines if a point is contained within the shape.
@@ -55,14 +57,97 @@ pub struct Rectangle {
 }
 
 
+/// Represents a polygon in 2D space.
 pub struct Polygon {
-
+    /// The vertices of the polygon.
+    vertices: Vec<Point>,
 }
 
 impl Polygon {
-    #[allow(dead_code)]
-    pub fn vertex() {
+    /// Creates a new empty polygon.
+    pub fn new() -> Self {
+        Polygon { vertices: Vec::new() }
+    }
 
+    /// Adds a vertex to the polygon.
+    pub fn add_vertex(&mut self, point: Point) {
+        self.vertices.push(point);
+    }
+
+    /// Returns a slice of the polygon's vertices.
+    pub fn vertices(&self) -> &[Point] {
+        &self.vertices
+    }
+}
+
+impl Shape for Polygon {
+    fn contains(&self, point: Point) -> bool {
+        // Implementation of the ray-casting algorithm
+        let mut inside = false;
+        let mut j = self.vertices.len() - 1;
+        for i in 0..self.vertices.len() {
+            let vi = &self.vertices[i];
+            let vj = &self.vertices[j];
+            if ((vi.y > point.y) != (vj.y > point.y)) &&
+               (point.x < (vj.x - vi.x) * (point.y - vi.y) / (vj.y - vi.y) + vi.x)
+            {
+                inside = !inside;
+            }
+            j = i;
+        }
+        inside
+    }
+
+    fn bounding_box(&self) -> (Point, Point) {
+        if self.vertices.is_empty() {
+            return (Point::new(0.0, 0.0), Point::new(0.0, 0.0));
+        }
+        
+        let mut min_x = f32::INFINITY;
+        let mut min_y = f32::INFINITY;
+        let mut max_x = f32::NEG_INFINITY;
+        let mut max_y = f32::NEG_INFINITY;
+
+        for vertex in &self.vertices {
+            min_x = min_x.min(vertex.x);
+            min_y = min_y.min(vertex.y);
+            max_x = max_x.max(vertex.x);
+            max_y = max_y.max(vertex.y);
+        }
+
+        (Point::new(min_x, min_y), Point::new(max_x, max_y))
+    }
+
+    fn distance(&self, point: Point) -> f32 {
+        if self.vertices.len() < 2 {
+            return f32::INFINITY;
+        }
+
+        let mut min_distance = f32::INFINITY;
+        let mut prev = self.vertices.last().unwrap();
+
+        for vertex in &self.vertices {
+            let line = Line::new(*prev, *vertex);
+            let distance = line.distance_to_point(&point);
+            min_distance = min_distance.min(distance);
+            prev = vertex;
+        }
+
+        if self.contains(point) {
+            -min_distance
+        } else {
+            min_distance
+        }
+    }
+}
+
+impl fmt::Display for Polygon {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Polygon with {} vertices:", self.vertices.len())?;
+        for (i, vertex) in self.vertices.iter().enumerate() {
+            writeln!(f, "  Vertex {}: ({:.2}, {:.2})", i + 1, vertex.x, vertex.y)?;
+        }
+        Ok(())
     }
 }
 
@@ -170,4 +255,29 @@ impl Shape for Rectangle {
         // Calculate the distance between the given point and the closest point
         point.distance(&closest_point)
     }
+}
+
+pub struct PolygonBuilder {
+    current_polygon: Option<Polygon>,
+}
+
+impl PolygonBuilder {
+    pub fn new() -> Self {
+        PolygonBuilder { current_polygon: None }
+    }
+
+    pub fn begin_shape(&mut self) {
+        self.current_polygon = Some(Polygon::new());
+    }
+
+    pub fn vertex(&mut self, x: f32, y: f32) {
+        if let Some(polygon) = &mut self.current_polygon {
+            polygon.add_vertex(Point::new(x, y));
+        }
+    }
+
+    pub fn end_shape(&mut self) -> Option<Polygon> {
+        self.current_polygon.take()
+    }
+
 }

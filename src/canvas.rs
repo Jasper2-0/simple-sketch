@@ -1,7 +1,7 @@
 use crate::pixelbuffer::PixelBuffer;
 use crate::color::Color;
 use crate::geom::Point;
-use crate::shape::{Shape, Ellipse, Rectangle};
+use crate::shape::{Shape, Ellipse, Rectangle, Polygon};
 
 pub struct Canvas {
     pub width: usize,
@@ -48,7 +48,7 @@ impl Canvas {
     pub fn line(&mut self, start: Point, end: Point) {
         if let Some(stroke_color) = &self.stroke_color {
             //self.pixel_buffer.draw_line(start, end, *stroke_color);
-            self.pixel_buffer.draw_line_aa(start, end, *stroke_color);
+            self.pixel_buffer.line_wu(start, end, *stroke_color);
         }
     }
 
@@ -118,7 +118,7 @@ impl Canvas {
                 // Check if the pixel is within the stroke width
                 if distance.abs() <= self.stroke_weight / 2.0 {
                     // For sharper lines, don't use anti-aliasing
-                    self.pixel_buffer.set_pixel(px, py, color);
+                    self.pixel_buffer.set_pixel(px, py, &color);
                 }
                 // Optional: Add minimal anti-aliasing at the edges
                 else if distance.abs() <= (self.stroke_weight / 2.0) + 1.0 {
@@ -155,6 +155,67 @@ impl Canvas {
         }
     }
 
+    pub fn draw_polygon(&mut self, polygon: &Polygon) {
+        if let Some(fill_color) = self.fill_color {
+            self.fill_polygon(polygon, fill_color);
+        }
+        if let Some(stroke_color) = self.stroke_color {
+            self.stroke_polygon(polygon, stroke_color);
+        }
+    }
+
+    fn fill_polygon(&mut self, polygon: &Polygon, color: Color) {
+        let vertices = polygon.vertices();
+        if vertices.len() < 3 {
+            return; // Not a polygon
+        }
+
+        let (min, max) = polygon.bounding_box();
+        let min_y = min.y.max(0.0) as i32;
+        let max_y = max.y.min(self.height as f32 - 1.0) as i32;
+
+        for y in min_y..=max_y {
+            let mut intersections: Vec<f32> = Vec::new();
+
+            // Find intersections
+            for i in 0..vertices.len() {
+                let j = (i + 1) % vertices.len();
+                let vi = vertices[i];
+                let vj = vertices[j];
+
+                if (vi.y > y as f32) != (vj.y > y as f32) {
+                    let x = vi.x + (y as f32 - vi.y) * (vj.x - vi.x) / (vj.y - vi.y);
+                    intersections.push(x);
+                }
+            }
+
+            // Sort intersections
+            intersections.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+            // Fill between intersection pairs
+            for i in (0..intersections.len()).step_by(2) {
+                if i + 1 < intersections.len() {
+                    let x_start = intersections[i].max(0.0) as i32;
+                    let x_end = intersections[i + 1].min(self.width as f32 - 1.0) as i32;
+                    for x in x_start..=x_end {
+                        self.pixel_buffer.set_pixel(x, y, &color);
+                    }
+                }
+            }
+        }
+    }
+
+    fn stroke_polygon(&mut self, polygon: &Polygon, color: Color) {
+        let vertices = polygon.vertices();
+        if vertices.len() < 2 {
+            return; // Not even a line
+        }
+
+        for i in 0..vertices.len() {
+            let j = (i + 1) % vertices.len();
+            self.line(vertices[i], vertices[j]);
+        }
+    }
 
 
 }

@@ -180,4 +180,8 @@ impl Line {
             self.start + line_vec * t
         }
     }
+    pub fn distance_to_point(&self, point: &Point) -> f32 {
+        let closest = self.closest_point(point);
+        point.distance(&closest)
+    }
 }

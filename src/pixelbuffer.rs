@@ -26,7 +26,7 @@ impl PixelBuffer {
         }
     }
 
-    pub fn set_pixel(&mut self, x: i32, y: i32, color: Color) {
+    pub fn set_pixel(&mut self, x: i32, y: i32, color: &Color) {
         // Check if the pixel is within the canvas bounds
         if x >= 0 && x < self.width as i32 && y >= 0 && y < self.height as i32 {
             let index = y as usize * self.width + x as usize;
@@ -53,7 +53,7 @@ impl PixelBuffer {
         }
     }
 
-    pub fn line_dda(&mut self, start: Point, end: Point, color: Color) {
+    pub fn line_dda(&mut self, start: Point, end: Point, color: &Color) {
         let dx = end.x as i32 - start.x as i32;
         let dy = end.y as i32 - start.y as i32;
         
@@ -74,7 +74,7 @@ impl PixelBuffer {
 
     #[allow(dead_code)]
     // bresenham's line drawing algorithm
-    pub fn line_bresenham(&mut self, start: Point, end: Point, color: Color) {
+    pub fn line_bresenham(&mut self, start: Point, end: Point, color: &Color) {
         
         let start_x = start.x.floor() as i32;
         let start_y = start.y.floor() as i32;
