@@ -2,7 +2,7 @@ use minifb::{Window, WindowOptions};
 use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::geom::Point;
-use crate::shape::{PolygonBuilder};
+use crate::shape::PolygonBuilder;
 use std::f32::consts::PI;
 
 //use std::time::Instant;

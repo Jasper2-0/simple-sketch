@@ -1,4 +1,4 @@
- //! A 2D geometry module providing basic structures and operations for points, lines, and rectangles.
+//! A 2D geometry module providing basic structures and operations for points, lines, and rectangles.
 
 mod point;
 mod line;

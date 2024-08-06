@@ -52,9 +52,22 @@ impl Canvas {
         }
     }
 
+    pub fn arc() {
 
+    }
 
-
+    pub fn circle(&mut self, center:Point, diameter:f32) {
+        
+        let width = diameter;
+        let height = diameter;
+        
+        let shape = Ellipse {
+            center,
+            width,
+            height,
+        };
+        self.draw_shape_aa(&shape);
+    }
 
     pub fn ellipse(&mut self, center: Point, width: f32, height: f32) {
         let shape = Ellipse {
@@ -65,6 +78,14 @@ impl Canvas {
         self.draw_shape_aa(&shape);
     }
 
+    pub fn point() {
+
+    }
+
+    pub fn quad() {
+
+    }
+
     pub fn rectangle(&mut self, top_left: Point, width: f32, height: f32) {
         let shape = Rectangle {
             top_left,
@@ -73,6 +94,14 @@ impl Canvas {
         };
         self.draw_shape_aa(&shape);
     }
+
+    pub fn square() {
+
+    }
+
+    pub fn triangle() {
+
+    }    
 
     fn draw_shape_aa(&mut self, shape: &impl Shape) {
         if let Some(fill_color) = &self.fill_color {
