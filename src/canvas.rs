@@ -28,32 +28,73 @@ impl Canvas {
         }
     }
 
-    pub fn background(&mut self, color: Color) {
+
+    
+
+    /**
+     * Color Setting
+     */
+
+     pub fn background(&mut self, color: Color) {
         self.pixel_buffer.clear(color);
     }
 
-    pub fn set_fill(&mut self, color: Option<Color>) {
+    pub fn clear() {
+        //TODO
+    }
+
+    pub fn color_mode() {
+        //TODO
+    }
+
+    pub fn no_fill() {
+        //TODO
+    }
+
+    pub fn no_stroke(){
+        //TODO
+    }
+
+    pub fn fill(&mut self, color: Option<Color>) {
         self.fill_color = color;
         self.fill = true;
     }
 
-    pub fn set_stroke(&mut self, color: Option<Color>) {
+    pub fn stroke(&mut self, color: Option<Color>) {
         self.stroke_color = color;
         self.stroke = true;
     }
 
-    pub fn set_stroke_weight(&mut self, weight: f32) {
+
+
+    /** 
+     * Attributes
+     */
+    pub fn ellipse_mode() {
+        //TODO
+    }
+
+    pub fn rect_mode() {
+        //TODO
+    }
+
+    pub fn stroke_cap() {
+        //TODO
+    }
+
+    pub fn stroke_join() {
+        //TODO        
+    }
+
+    pub fn stroke_weight(&mut self, weight: f32) {
         self.stroke_weight = weight;
     }
-    pub fn line(&mut self, start: Point, end: Point) {
-        if let Some(stroke_color) = &self.stroke_color {
-            //self.pixel_buffer.draw_line(start, end, *stroke_color);
-            self.pixel_buffer.line_wu(start, end, *stroke_color);
-        }
-    }
 
+    /**
+     * 2D Primitives
+     */
     pub fn arc() {
-
+        //TODO
     }
 
     pub fn circle(&mut self, center:Point, diameter:f32) {
@@ -78,12 +119,19 @@ impl Canvas {
         self.draw_shape_aa(&shape);
     }
 
-    pub fn point() {
+    pub fn line(&mut self, start: Point, end: Point) {
+        if let Some(stroke_color) = &self.stroke_color {
+            //self.pixel_buffer.draw_line(start, end, *stroke_color);
+            self.pixel_buffer.line_wu(start, end, *stroke_color);
+        }
+    }
 
+    pub fn point() {
+        //TODO
     }
 
     pub fn quad() {
-
+        //TODO
     }
 
     pub fn rectangle(&mut self, top_left: Point, width: f32, height: f32) {
@@ -96,13 +144,16 @@ impl Canvas {
     }
 
     pub fn square() {
-
+        //TODO
     }
 
     pub fn triangle() {
+        //TODO
+    }
 
-    }    
-
+    /**
+     * Internal Canvas functions
+     */
     fn draw_shape_aa(&mut self, shape: &impl Shape) {
         if let Some(fill_color) = &self.fill_color {
             self.fill_shape_aa(shape, *fill_color);
@@ -124,7 +175,7 @@ impl Canvas {
                 let point = Point::new(px as f32, py as f32);
                 let coverage = self.calculate_coverage(shape, point);
                 if coverage > 0.0 {
-                    let aa_color = color.with_alpha((color.a() as f32 * coverage) as u8);
+                    let aa_color = color.with_alpha((color.alpha() as f32 * coverage) as u8);
                     self.pixel_buffer.blend_pixel(px, py, &aa_color);
                 }
             }
@@ -245,6 +296,58 @@ impl Canvas {
             self.line(vertices[i], vertices[j]);
         }
     }
+
+
+}
+
+    /**
+     * Vertex
+     */
+    
+pub struct PolygonBuilder {
+    current_polygon: Option<Polygon>,
+}
+
+impl PolygonBuilder {
+    pub fn new() -> Self {
+        PolygonBuilder { current_polygon: None }
+    }
+
+    pub fn begin_contour() {
+        //TODO
+    }
+
+
+    pub fn begin_shape(&mut self) {
+        self.current_polygon = Some(Polygon::new());
+    }
+
+    pub fn bezier_vertex() {
+        //TODO
+    }
+
+    pub fn curve_vertex() {
+        //TODO
+    }
+
+    pub fn end_contour() {
+        //TODO
+    }
+
+    pub fn end_shape(&mut self) -> Option<Polygon> {
+        self.current_polygon.take()
+    }    
+
+    pub fn quadratic_vertex() {
+        //TODO
+    }
+
+    pub fn vertex(&mut self, x: f32, y: f32) {
+        if let Some(polygon) = &mut self.current_polygon {
+            polygon.add_vertex(Point::new(x, y));
+        }
+    }
+
 
 
 }

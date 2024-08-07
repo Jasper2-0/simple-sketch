@@ -13,13 +13,37 @@ impl Color {
         Color(((a as u32) << 24) | ((r as u32) << 16) | ((g as u32) << 8) | (b as u32))
     }
 
-    pub fn r(&self) -> u8 { ((self.0 >> 16) & 0xFF) as u8 }
-    pub fn g(&self) -> u8 { ((self.0 >> 8) & 0xFF) as u8 }
-    pub fn b(&self) -> u8 { (self.0 & 0xFF) as u8 }
-    pub fn a(&self) -> u8 { ((self.0 >> 24) & 0xFF) as u8 }
+    pub fn red (&self) -> u8 { 
+        ((self.0 >> 16) & 0xFF) as u8 
+    }
+    pub fn green (&self) -> u8 { 
+        ((self.0 >> 8) & 0xFF) as u8 
+    }
+    pub fn blue (&self) -> u8 { 
+        (self.0 & 0xFF) as u8 
+    }
+    pub fn alpha (&self) -> u8 { 
+        ((self.0 >> 24) & 0xFF) as u8 
+    }
+
+    pub fn brightness() {
+        //TODO
+    }
+
+    pub fn hue() {
+        //TODO
+    }
+
+    pub fn saturation () {
+        //TODO
+    }
+
+    pub fn lerp_color () {
+        //TODO
+    }
 
     pub fn with_alpha(&self, alpha: u8) -> Color {
-        Color::new(self.r(), self.g(), self.b(), alpha)
+        Color::new(self.red(), self.green(), self.blue(), alpha)
     }
 
     // Helper function to convert HSV to RGB
@@ -48,10 +72,10 @@ impl Color {
     pub fn fmt_debug(&self, f: &mut fmt::Formatter<'_>, format: ColorFormat) -> fmt::Result {
         match format {
             ColorFormat::Rgba => {
-                write!(f, "Color(r: {}, g: {}, b: {}, a: {})", self.r(), self.g(), self.b(), self.a())
+                write!(f, "Color(r: {}, g: {}, b: {}, a: {})", self.red(), self.green(), self.blue(), self.alpha())
             }
             ColorFormat::RGBHex => {
-                write!(f, "Color(#{:02X}{:02X}{:02X})", self.r(), self.g(), self.b())
+                write!(f, "Color(#{:02X}{:02X}{:02X})", self.red(), self.green(), self.blue())
             }
         }
     }

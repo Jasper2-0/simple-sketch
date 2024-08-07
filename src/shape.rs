@@ -257,27 +257,3 @@ impl Shape for Rectangle {
     }
 }
 
-pub struct PolygonBuilder {
-    current_polygon: Option<Polygon>,
-}
-
-impl PolygonBuilder {
-    pub fn new() -> Self {
-        PolygonBuilder { current_polygon: None }
-    }
-
-    pub fn begin_shape(&mut self) {
-        self.current_polygon = Some(Polygon::new());
-    }
-
-    pub fn vertex(&mut self, x: f32, y: f32) {
-        if let Some(polygon) = &mut self.current_polygon {
-            polygon.add_vertex(Point::new(x, y));
-        }
-    }
-
-    pub fn end_shape(&mut self) -> Option<Polygon> {
-        self.current_polygon.take()
-    }
-
-}

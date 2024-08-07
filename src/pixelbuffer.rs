@@ -41,12 +41,12 @@ impl PixelBuffer {
             let background = self.buffer[index];
     
             let bg_color = Color(background);
-            let alpha = color.a() as f32 / 255.0;
+            let alpha = color.alpha() as f32 / 255.0;
             let inv_alpha = 1.0 - alpha;
     
-            let new_r = (inv_alpha * bg_color.r() as f32 + alpha * color.r() as f32) as u8;
-            let new_g = (inv_alpha * bg_color.g() as f32 + alpha * color.g() as f32) as u8;
-            let new_b = (inv_alpha * bg_color.b() as f32 + alpha * color.b() as f32) as u8;
+            let new_r = (inv_alpha * bg_color.red() as f32 + alpha * color.red() as f32) as u8;
+            let new_g = (inv_alpha * bg_color.green() as f32 + alpha * color.green() as f32) as u8;
+            let new_b = (inv_alpha * bg_color.blue() as f32 + alpha * color.blue() as f32) as u8;
             let new_a = 255; // Assuming full opacity for the final color
     
             self.buffer[index] = Color::new(new_r, new_g, new_b, new_a).0;
@@ -172,7 +172,7 @@ impl PixelBuffer {
         }
     }
     fn plot(&mut self, x: i32, y: i32, color: Color, alpha: f32) {
-        let aa_color = color.with_alpha((color.a() as f32 * alpha) as u8);
+        let aa_color = color.with_alpha((color.alpha() as f32 * alpha) as u8);
         self.blend_pixel(x, y, &aa_color);
     }
 /* 

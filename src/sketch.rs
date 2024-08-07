@@ -1,8 +1,8 @@
 use minifb::{Window, WindowOptions};
-use crate::canvas::Canvas;
+use crate::canvas::{Canvas, PolygonBuilder};
 use crate::color::Color;
 use crate::geom::Point;
-use crate::shape::PolygonBuilder;
+
 use std::f32::consts::PI;
 
 //use std::time::Instant;
@@ -62,8 +62,8 @@ impl Sketch {
         self.canvas.background(Color::new(0, 0, 0, 255));
 
         // Draw grid
-        self.canvas.set_stroke(Some(Color::new(32, 32, 32, 255))); // Light gray color for grid
-        self.canvas.set_stroke_weight(1.0); // Thin lines for grid
+        self.canvas.stroke(Some(Color::new(32, 32, 32, 255))); // Light gray color for grid
+        self.canvas.stroke_weight(1.0); // Thin lines for grid
 
         // Vertical lines
         for x in (0..self.canvas.width).step_by(20) {
@@ -99,11 +99,11 @@ impl Sketch {
             // Set different colors for each circle
             let hue = (i as f32 / num_ellipses as f32) * 360.0;
             let color = Color::hsv_to_rgb(hue, 1.0, 1.0);
-            self.canvas.set_stroke(Some(color));
-            self.canvas.set_fill(Some(color));
+            self.canvas.stroke(Some(color));
+            self.canvas.fill(Some(color));
 
             // Draw the circle
-            self.canvas.set_stroke_weight(1.0);
+            self.canvas.stroke_weight(1.0);
             self.canvas.ellipse(circle_center, 5.0, 5.0);
 
             // Draw line from center to circle
@@ -122,7 +122,7 @@ impl Sketch {
         polygon_builder.vertex(150.0, 200.0);
         let polygon = polygon_builder.end_shape().unwrap();
 
-        self.canvas.set_fill(Some(Color::new(255, 0, 0, 128))); // Semi-transparent red
+        self.canvas.fill(Some(Color::new(255, 0, 0, 128))); // Semi-transparent red
         self.canvas.draw_polygon(&polygon);
 
 
