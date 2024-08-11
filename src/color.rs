@@ -27,19 +27,19 @@ impl Color {
     }
 
     pub fn brightness() {
-        //TODO
+        //TODO Get Brightness value of color
     }
 
     pub fn hue() {
-        //TODO
+        //TODO get hue value of color
     }
 
     pub fn saturation () {
-        //TODO
+        //TODO get saturation value of color
     }
 
     pub fn lerp_color () {
-        //TODO
+        //TODO lerp between two colors
     }
 
     pub fn with_alpha(&self, alpha: u8) -> Color {

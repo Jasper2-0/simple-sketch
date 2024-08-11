@@ -108,73 +108,133 @@ impl PixelBuffer {
     
 
     // Wu's anti-aliased line drawing algorithm
-    pub fn line_wu(&mut self, mut start: Point, mut end: Point, color: Color) {
-        let steep = (end.y - start.y).abs() > (end.x - start.x).abs();
-        
-        if steep {
-            std::mem::swap(&mut start.x, &mut start.y);
-            std::mem::swap(&mut end.x, &mut end.y);
-        }
-        
-        if start.x > end.x {
-            std::mem::swap(&mut start, &mut end);
-        }
+/// Draws an anti-aliased line using Xiaolin Wu's algorithm.
+///
+/// This function implements Xiaolin Wu's line algorithm to draw a smooth,
+/// anti-aliased line between two points. It handles all cases of line drawing,
+/// including vertical, horizontal, and diagonal lines.
+///
+/// # Arguments
+///
+/// * `&mut self` - Mutable reference to the struct containing the pixel buffer.
+/// * `start: Point` - The starting point of the line.
+/// * `end: Point` - The ending point of the line.
+/// * `color: Color` - The color of the line.
+///
+/// # Algorithm Overview
+///
+/// 1. Determine if the line is steep (more vertical than horizontal).
+/// 2. Ensure the line is always drawn from left to right.
+/// 3. Calculate the gradient of the line.
+/// 4. Handle the endpoints of the line.
+/// 5. Plot the main body of the line.
+///
+/// # Performance Considerations
+///
+/// - This algorithm is more computationally expensive than simple line drawing
+///   algorithms, but produces smoother lines.
+/// - It performs floating-point calculations, which may impact performance on
+///   some systems.
+///
+/// # Example
+///
+/// ```
+/// let mut image = Image::new(100, 100);
+/// let start = Point::new(10.0, 10.0);
+/// let end = Point::new(90.0, 90.0);
+/// let color = Color::new(255, 0, 0, 255); // Red
+/// image.line_wu(start, end, color);
+/// ```
+pub fn line_wu(&mut self, mut start: Point, mut end: Point, color: Color) {
+    // Determine if the line is steep (more vertical than horizontal)
+    let steep = (end.y - start.y).abs() > (end.x - start.x).abs();
 
-        let dx = end.x - start.x;
-        let dy = end.y - start.y;
-        let gradient = if dx == 0.0 { 1.0 } else { dy / dx };
+    // If the line is steep, swap x and y coordinates
+    if steep {
+        std::mem::swap(&mut start.x, &mut start.y);
+        std::mem::swap(&mut end.x, &mut end.y);
+    }
 
-        // Handle first endpoint
-        let mut xend = start.x.round();
-        let mut yend = start.y + gradient * (xend - start.x);
-        let mut xgap = 1.0 - (start.x + 0.5).fract();
-        let xpxl1 = xend as i32;
-        let ypxl1 = yend.floor() as i32;
-        
-        if steep {
-            self.plot(ypxl1, xpxl1, color, (1.0 - yend.fract()) * xgap);
-            self.plot(ypxl1 + 1, xpxl1, color, yend.fract() * xgap);
-        } else {
-            self.plot(xpxl1, ypxl1, color, (1.0 - yend.fract()) * xgap);
-            self.plot(xpxl1, ypxl1 + 1, color, yend.fract() * xgap);
+    // Ensure the line is always drawn from left to right
+    if start.x > end.x {
+        std::mem::swap(&mut start, &mut end);
+    }
+
+    // Calculate the slope of the line
+    let dx = end.x - start.x;
+    let dy = end.y - start.y;
+    let gradient = if dx == 0.0 { 1.0 } else { dy / dx };
+
+    // Handle the first endpoint
+    let mut xend = start.x.round();
+    let mut yend = start.y + gradient * (xend - start.x);
+    let mut xgap = 1.0 - (start.x + 0.5).fract();
+    let xpxl1 = xend as i32;
+    let ypxl1 = yend.floor() as i32;
+
+    // Plot the first endpoint
+    if steep {
+        self.plot(ypxl1, xpxl1, color, (1.0 - yend.fract()) * xgap);
+        self.plot(ypxl1 + 1, xpxl1, color, yend.fract() * xgap);
+    } else {
+        self.plot(xpxl1, ypxl1, color, (1.0 - yend.fract()) * xgap);
+        self.plot(xpxl1, ypxl1 + 1, color, yend.fract() * xgap);
+    }
+
+    // First y-intersection for the main loop
+    let mut intery = yend + gradient;
+
+    // Handle the second endpoint
+    xend = end.x.round();
+    yend = end.y + gradient * (xend - end.x);
+    xgap = (end.x + 0.5).fract();
+    let xpxl2 = xend as i32;
+    let ypxl2 = yend.floor() as i32;
+
+    // Plot the second endpoint
+    if steep {
+        self.plot(ypxl2, xpxl2, color, (1.0 - yend.fract()) * xgap);
+        self.plot(ypxl2 + 1, xpxl2, color, yend.fract() * xgap);
+    } else {
+        self.plot(xpxl2, ypxl2, color, (1.0 - yend.fract()) * xgap);
+        self.plot(xpxl2, ypxl2 + 1, color, yend.fract() * xgap);
+    }
+
+    // Main loop
+    if steep {
+        for x in (xpxl1 + 1)..xpxl2 {
+            // Plot the main pixels of the line
+            self.plot(intery.floor() as i32, x, color, 1.0 - intery.fract());
+            self.plot(intery.floor() as i32 + 1, x, color, intery.fract());
+            intery += gradient;
         }
-        
-        let mut intery = yend + gradient;
-
-        // Handle second endpoint
-        xend = end.x.round();
-        yend = end.y + gradient * (xend - end.x);
-        xgap = (end.x + 0.5).fract();
-        let xpxl2 = xend as i32;
-        let ypxl2 = yend.floor() as i32;
-        
-        if steep {
-            self.plot(ypxl2, xpxl2, color, (1.0 - yend.fract()) * xgap);
-            self.plot(ypxl2 + 1, xpxl2, color, yend.fract() * xgap);
-        } else {
-            self.plot(xpxl2, ypxl2, color, (1.0 - yend.fract()) * xgap);
-            self.plot(xpxl2, ypxl2 + 1, color, yend.fract() * xgap);
-        }
-
-        // Main loop
-        if steep {
-            for x in (xpxl1 + 1)..xpxl2 {
-                self.plot(intery.floor() as i32, x, color, 1.0 - intery.fract());
-                self.plot(intery.floor() as i32 + 1, x, color, intery.fract());
-                intery += gradient;
-            }
-        } else {
-            for x in (xpxl1 + 1)..xpxl2 {
-                self.plot(x, intery.floor() as i32, color, 1.0 - intery.fract());
-                self.plot(x, intery.floor() as i32 + 1, color, intery.fract());
-                intery += gradient;
-            }
+    } else {
+        for x in (xpxl1 + 1)..xpxl2 {
+            // Plot the main pixels of the line
+            self.plot(x, intery.floor() as i32, color, 1.0 - intery.fract());
+            self.plot(x, intery.floor() as i32 + 1, color, intery.fract());
+            intery += gradient;
         }
     }
-    fn plot(&mut self, x: i32, y: i32, color: Color, alpha: f32) {
-        let aa_color = color.with_alpha((color.alpha() as f32 * alpha) as u8);
-        self.blend_pixel(x, y, &aa_color);
-    }
+}
+
+/// Helper function to plot a pixel with anti-aliasing.
+///
+/// This function blends the given color with the existing pixel color based on
+/// the provided alpha value, creating the anti-aliasing effect.
+///
+/// # Arguments
+///
+/// * `x: i32` - The x-coordinate of the pixel.
+/// * `y: i32` - The y-coordinate of the pixel.
+/// * `color: Color` - The color to be blended.
+/// * `alpha: f32` - The alpha value for blending (0.0 to 1.0).
+fn plot(&mut self, x: i32, y: i32, color: Color, alpha: f32) {
+    // Create a new color with the adjusted alpha for anti-aliasing
+    let aa_color = color.with_alpha((color.alpha() as f32 * alpha) as u8);
+    // Blend the new color with the existing pixel color
+    self.blend_pixel(x, y, &aa_color);
+}
 /* 
         // Fill a rectangular area with a specific color
         pub fn fill_rect(&mut self, x: u32, y: u32, width: u32, height: u32, color: u32) {

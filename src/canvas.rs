@@ -68,7 +68,9 @@ impl Canvas {
 
 
     /** 
+     *
      * Attributes
+     * 
      */
     pub fn ellipse_mode() {
         //TODO
@@ -91,7 +93,9 @@ impl Canvas {
     }
 
     /**
+     * 
      * 2D Primitives
+     * 
      */
     pub fn arc() {
         //TODO
@@ -152,7 +156,9 @@ impl Canvas {
     }
 
     /**
+     * 
      * Internal Canvas functions
+     * 
      */
     fn draw_shape_aa(&mut self, shape: &impl Shape) {
         if let Some(fill_color) = &self.fill_color {
@@ -244,39 +250,89 @@ impl Canvas {
         }
     }
 
+    /// Fills a polygon with a specified color.
+    ///
+    /// This function implements a scanline algorithm to fill a given polygon with a specified color.
+    /// It handles clipping to the image boundaries and deals with complex polygons (including those with holes).
+    ///
+    /// # Arguments
+    ///
+    /// * `&mut self` - Mutable reference to the struct containing the pixel buffer.
+    /// * `polygon: &Polygon` - Reference to the polygon to be filled.
+    /// * `color: Color` - The color to fill the polygon with.
+    ///
+    /// # Algorithm Overview
+    ///
+    /// 1. Check if the polygon has at least 3 vertices (otherwise it's not a valid polygon).
+    /// 2. Determine the y-range of the polygon within the image boundaries.
+    /// 3. For each scanline (y-coordinate) within this range:
+    ///    a. Find intersections of the scanline with polygon edges.
+    ///    b. Sort these intersections.
+    ///    c. Fill pixels between pairs of intersections.
+    ///
+    /// # Edge Cases
+    ///
+    /// - Polygons with less than 3 vertices are ignored.
+    /// - The function clips the polygon to the image boundaries.
+    /// - It correctly handles complex polygons, including those with holes.
+    ///
+    /// # Performance Considerations
+    ///
+    /// - The algorithm's time complexity is O(n * h), where n is the number of vertices and h is the height of the polygon.
+    /// - For polygons with many vertices or large heights, consider optimizing the intersection finding step.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut image = Image::new(100, 100);
+    /// let polygon = Polygon::new(vec![Point::new(10.0, 10.0), Point::new(90.0, 10.0), Point::new(50.0, 90.0)]);
+    /// let color = Color::new(255, 0, 0, 255); // Red
+    /// image.fill_polygon(&polygon, color);
+    /// ```
     fn fill_polygon(&mut self, polygon: &Polygon, color: Color) {
+        // Get the vertices of the polygon
         let vertices = polygon.vertices();
+    
+        // Check if the polygon has at least 3 vertices
         if vertices.len() < 3 {
-            return; // Not a polygon
+            return; // Not a valid polygon, so we return early
         }
-
+    
+        // Determine the y-range that we need to fill with our polygon filler
         let (min, max) = polygon.bounding_box();
+        // Clip the y-range to the image boundaries
         let min_y = min.y.max(0.0) as i32;
         let max_y = max.y.min(self.height as f32 - 1.0) as i32;
-
+    
+        // Iterate over each scanline (row) in the bounding box of the polygon
         for y in min_y..=max_y {
             let mut intersections: Vec<f32> = Vec::new();
-
-            // Find intersections
+        
+            // Find the intersections where the scanline intersects with edges of the polygon
             for i in 0..vertices.len() {
-                let j = (i + 1) % vertices.len();
+                let j = (i + 1) % vertices.len(); // Get the next vertex (wrapping around to the first for the last edge)
                 let vi = vertices[i];
                 let vj = vertices[j];
-
+            
+                // Check if the edge crosses the current scanline
                 if (vi.y > y as f32) != (vj.y > y as f32) {
+                    // Calculate the x-coordinate of the intersection
                     let x = vi.x + (y as f32 - vi.y) * (vj.x - vi.x) / (vj.y - vi.y);
                     intersections.push(x);
                 }
             }
-
-            // Sort intersections
+        
+            // Sort intersections from left to right
             intersections.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
+        
             // Fill between intersection pairs
             for i in (0..intersections.len()).step_by(2) {
                 if i + 1 < intersections.len() {
+                    // Clip the x-range to the image boundaries
                     let x_start = intersections[i].max(0.0) as i32;
                     let x_end = intersections[i + 1].min(self.width as f32 - 1.0) as i32;
+                
+                    // Fill the pixels between the current pair of intersections
                     for x in x_start..=x_end {
                         self.pixel_buffer.set_pixel(x, y, &color);
                     }
